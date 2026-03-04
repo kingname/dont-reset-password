@@ -81,18 +81,34 @@ const DRP_Tooltip = {
     if (upBtn && data.rule_id) {
       upBtn.addEventListener('click', () => {
         try {
-          chrome.runtime.sendMessage({ type: 'VOTE', ruleId: data.rule_id, vote: 'up' });
+          chrome.runtime.sendMessage({ type: 'VOTE', ruleId: data.rule_id, vote: 'up', domain: data.domain });
         } catch (e) { /* extension context invalidated */ }
+        // Optimistic UI: increment count and highlight
+        const currentCount = parseInt(upBtn.textContent.replace(/\D/g, '')) || 0;
+        upBtn.textContent = `\uD83D\uDC4D ${currentCount + 1}`;
         upBtn.classList.add('drp-voted');
+        // Reset downvote if previously voted
+        if (downBtn.classList.contains('drp-voted')) {
+          const downCount = parseInt(downBtn.textContent.replace(/\D/g, '')) || 0;
+          downBtn.textContent = `\uD83D\uDC4E ${Math.max(0, downCount - 1)}`;
+        }
         downBtn.classList.remove('drp-voted');
       });
     }
     if (downBtn && data.rule_id) {
       downBtn.addEventListener('click', () => {
         try {
-          chrome.runtime.sendMessage({ type: 'VOTE', ruleId: data.rule_id, vote: 'down' });
+          chrome.runtime.sendMessage({ type: 'VOTE', ruleId: data.rule_id, vote: 'down', domain: data.domain });
         } catch (e) { /* extension context invalidated */ }
+        // Optimistic UI: increment count and highlight
+        const currentCount = parseInt(downBtn.textContent.replace(/\D/g, '')) || 0;
+        downBtn.textContent = `\uD83D\uDC4E ${currentCount + 1}`;
         downBtn.classList.add('drp-voted');
+        // Reset upvote if previously voted
+        if (upBtn.classList.contains('drp-voted')) {
+          const upCount = parseInt(upBtn.textContent.replace(/\D/g, '')) || 0;
+          upBtn.textContent = `\uD83D\uDC4D ${Math.max(0, upCount - 1)}`;
+        }
         upBtn.classList.remove('drp-voted');
       });
     }
