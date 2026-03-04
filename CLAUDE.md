@@ -52,6 +52,15 @@ Anonymous SHA-256 hash of a random installation UUID. No accounts, no login. Sto
 
 ## Development
 
+### Running Tests
+
+```bash
+npm test                    # run all 116 tests (node:test, zero dependencies)
+node --test tests/domain.test.js   # run a single test file
+```
+
+Tests mock Chrome APIs (`chrome.storage`, `chrome.i18n`, `chrome.runtime`, `fetch`) via `tests/setup.js`. Available test files: `domain`, `rules-schema`, `cache`, `api`, `i18n`.
+
 ### Loading the Extension Locally
 
 1. Open `chrome://extensions`
@@ -82,6 +91,14 @@ supabase functions deploy vote
 supabase functions deploy report
 ```
 
+### Packaging for Distribution
+
+```bash
+cd extension && zip -r ../drp-extension.zip . -x "*.DS_Store"
+```
+
+Only the `extension/` directory goes into the zip. A GitHub Actions workflow (`.github/workflows/release.yml`) auto-creates releases on push to main, using the version from `manifest.json` as the tag.
+
 ## Conventions
 
 - Tooltip styles are embedded in `tooltip.js` (Shadow DOM), not in external CSS files. `content.css` is a placeholder.
@@ -89,3 +106,6 @@ supabase functions deploy report
 - Rate limits are enforced inside each Edge Function by querying recent rows per fingerprint, not via middleware.
 - Consensus algorithm: for boolean/numeric fields, majority wins; for string fields, most recent non-null wins. Confidence score = average agreement ratio across fields.
 - Content script heuristic: also detects `<input type="text">` where name/id/autocomplete contains "passw", "passwd", or "pwd".
+- MV3 cannot programmatically open the popup. `OPEN_POPUP` opens `popup.html` in a new tab with `?domain=` param; `popup.js` reads this param to skip `GET_DOMAIN`.
+- `DRP_i18n.msg(key, ...substitutions)` uses rest params — pass multiple substitutions as separate args, not an array.
+- Bump `version` in `manifest.json` before each release, or the GitHub Actions release will fail (duplicate tag).
