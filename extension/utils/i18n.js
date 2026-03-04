@@ -10,9 +10,11 @@ const DRP_i18n = {
    * @param {string|string[]} [substitutions] - Placeholder substitutions
    * @returns {string} The localized string, or the key itself as fallback
    */
-  msg(key, substitutions) {
+  msg(key, ...substitutions) {
     if (typeof chrome !== 'undefined' && chrome.i18n && chrome.i18n.getMessage) {
-      const subs = Array.isArray(substitutions) ? substitutions : substitutions ? [substitutions] : undefined;
+      const subs = substitutions.length === 1 && Array.isArray(substitutions[0])
+        ? substitutions[0]
+        : substitutions.length > 0 ? substitutions : undefined;
       return chrome.i18n.getMessage(key, subs) || key;
     }
     return key;
